@@ -1,0 +1,54 @@
+<pre>
+@echo off
+rem Naruhiko Ueda 2023-05-28 v1.2
+
+rem 管理者実行
+openfiles > nul 2>&1
+if not %ERRORLEVEL% == 0 (
+  powershell start-process \"%~f0\" -Verb runas
+  goto exit
+)
+echo マインクラフトを終了...
+taskkill /F /T /IM Minecraft.Windows.exe
+echo インストーラーをダウンロード...
+set "url=https://github.com/mlabmc/19/releases/download/MinecraftEducation_x86_1.19.52.0/MinecraftEducation_x86_1.19.52.0.msi"
+if not exist "%TEMP%\v1.19_install" (mkdir "%TEMP%\v1.19_install")
+curl -L -o "%TEMP%\v1.19_install\MinecraftEducation_x86_1.19.52.0.msi" "%url%"
+echo インストーラーをダウンロード完了
+
+echo マインクラフトを終了...
+taskkill /F /T /IM Minecraft.Windows.exe
+echo アンインストール...
+cd "%TEMP%\v1.19_install"
+msiexec /x MinecraftEducation_x86_1.19.52.0.msi /passive
+
+echo v1.18をダウンロード...
+set "url1=https://github.com/mlabmc/18/releases/download/MinecraftEducation_x86_1.18.45.0/MinecraftEducation_x86_1.18.45.0.msi"
+set "url2=https://github.com/mlabmc/18/releases/download/MinecraftEducation_x86_1.18.45.0/MinecraftEducation_x86_1.18.45.01.cab"
+if not exist "%TEMP%\v1.18_install" (mkdir "%TEMP%\v1.18_install")
+curl -L -o "%TEMP%\v1.18_install\MinecraftEducation_x86_1.18.45.0.msi" "%url1%"
+curl -L -o "%TEMP%\v1.18_install\MinecraftEducation_x86_1.18.45.01.cab" "%url2%"
+echo v1.18ダウンロード完了
+
+echo マインクラフトを終了...
+taskkill /F /T /IM Minecraft.Windows.exe
+echo v1.18インストール...
+cd "%TEMP%\v1.18_install"
+msiexec /i MinecraftEducation_x86_1.18.45.0.msi /passive
+
+echo アップデートスケジューラを削除...
+schtasks /delete /tn "Minecraft Education Automatic Updater" /f
+schtasks /delete /tn "Minecraft Education Weekly Updater" /f
+
+echo アップデートプログラムをリネーム...
+cd "C:\Program Files (x86)\Microsoft Studios\Minecraft Education Edition"
+if exist "MinecraftEducationUpdater.exe.org" del "MinecraftEducationUpdater.exe.org"
+ren "MinecraftEducationUpdater.exe" "MinecraftEducationUpdater.exe.org"
+
+echo 処理が完了しました！
+echo Minecraft Educationを起動します...
+start "" "C:\Program Files (x86)\Microsoft Studios\Minecraft Education Edition\Minecraft.Windows.exe"
+
+del %0
+exit
+</pre>
